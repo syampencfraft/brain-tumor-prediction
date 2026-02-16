@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroScan | Brain Tumor Detection</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">NEUROSCAN AI</div>
+        <div class="nav-links">
+            <a href="{% url 'index' %}" style="color: var(--text-main); text-decoration: none; font-weight: 500;">Home</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Advanced Brain Tumor Detection</h1>
+            <p>Upload an MRI scan to detect potential abnormalities using our proprietary CNN architecture.</p>
+        </div>
+
+        <div class="glass-card">
+            <form action="{% url 'upload_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+                <div class="upload-area" onclick="document.getElementById('mri_image').click()">
+                    <div class="upload-icon">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3>Drag & Drop or Click to Upload</h3>
+                    <p>Supported formats: JPG, PNG, WEBP (Prefer MRI Scans)</p>
+                    <input type="file" name="mri_image" id="mri_image" hidden onchange="this.form.submit()">
+                </div>
+            </form>
+
+            {% if prediction %}
+            <div class="result-section">
+                <div class="result-card">
+                    <img src="{{ image_url }}" alt="Uploaded MRI" class="result-image">
+                    <div class="result-info">
+                        <h2>Result: <span class="{% if 'Tumor' in prediction %}prediction-positive{% else %}prediction-negative{% endif %}">{{ prediction }}</span></h2>
+                        <p>Confidence: <strong>{{ probability }}</strong></p>
+                        <p style="margin-top: 1rem; color: var(--text-dim); font-size: 0.9rem;">
+                            <i class="fa-solid fa-circle-info"></i> Note: This result is AI-generated and should be verified by a medical professional.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 NeuroScan AI Project. Built with Django and TensorFlow.</p>
+    </footer>
+
+    <script>
+        // Optional: Add drag and drop visual feedback
+        const uploadArea = document.querySelector('.upload-area');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        uploadArea.addEventListener('dragover', () => {
+            uploadArea.style.borderColor = 'var(--primary-color)';
+            uploadArea.style.background = 'rgba(0, 210, 255, 0.05)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--glass-border)';
+            uploadArea.style.background = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            const fileInput = document.getElementById('mri_image');
+            fileInput.files = e.dataTransfer.files;
+            document.getElementById('upload-form').submit();
+        });
+    </script>
+</body>
+</html>
