@@ -5,6 +5,9 @@ import os
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 # Load model (placeholder for when it's ready)
 MODEL_PATH = os.path.join(os.getcwd(), 'models', 'brain_tumor_model.h5')
@@ -21,10 +24,45 @@ def get_model():
             print(f"Model not found at {MODEL_PATH}")
     return _model
 
+def home(request):
+    return render(request, 'core/home.html')
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('core:index')
+    else:
+        form = UserCreationForm()
+    return render(request, 'core/signup.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
+            return redirect('core:index')
+        else:
+            return render(request, 'core/login.html', {'form': form, 'error': 'Invalid username or password'})
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('core:home')
+
+@login_required(login_url='core:login')
 def index(request):
     images = MRIImage.objects.all().order_by('-uploaded_at')[:5]
     return render(request, 'core/index.html', {'images': images})
 
+@login_required(login_url='core:login')
 def upload_image(request):
     if request.method == 'POST' and request.FILES.get('mri_image'):
         mri_file = request.FILES['mri_image']
@@ -40,10 +78,11 @@ def upload_image(request):
         return render(request, 'core/index.html', {
             'prediction': prediction,
             'probability': f"{probability*100:.2f}%",
-            'image_url': mri_instance.image.url
+            'image_url': mri_instance.image.url,
+            'images': MRIImage.objects.all().order_by('-uploaded_at')[:5] # Context for list
         })
     
-    return redirect('index')
+    return redirect('core:index')
 
 def predict_tumor(image_path):
     model = get_model()

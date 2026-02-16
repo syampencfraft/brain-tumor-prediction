@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroScan AI - Advanced Brain Tumor Detection</title>
+    <style>
+        :root {
+            --primary: #00f2ea;
+            --secondary: #ff0050;
+            --bg-dark: #0a0a12;
+            --text-light: #e0e0e0;
+            --card-bg: #161625;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background: rgba(10, 10, 18, 0.95);
+            position: fixed;
+            width: 90%;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), #00c2ba);
+            color: #000;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 234, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 242, 234, 0.1);
+            color: #fff;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            background: radial-gradient(circle at top right, #1a1a2e, var(--bg-dark));
+            margin-top: 60px;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            background: linear-gradient(to right, #fff, #a0a0a0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-image {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/4/4c/Skull_and_brain_normal_human.svg') no-repeat center center;
+            background-size: contain;
+            filter: drop-shadow(0 0 20px rgba(0, 242, 234, 0.2));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .features {
+            padding: 5rem 5%;
+            background: var(--bg-dark);
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #fff;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: left;
+            transition: transform 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .footer {
+            padding: 2rem 5%;
+            text-align: center;
+            color: #666;
+            background: #050508;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">NeuroScan AI</div>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:index' %}" class="btn">Go to Dashboard</a>
+            {% else %}
+            <a href="{% url 'core:login' %}">Login</a>
+            <a href="{% url 'core:signup' %}" class="btn">Get Started</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>AI-Powered <br> Brain Tumor Detection</h1>
+            <p>Utilizing state-of-the-art deep learning algorithms to assist medical professionals in early and accurate
+                tumor identification from MRI scans.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:index' %}" class="btn">Start Analysis</a>
+            {% else %}
+            <a href="{% url 'core:signup' %}" class="btn">Create Account</a>
+            <a href="{% url 'core:login' %}" class="btn btn-outline" style="margin-left: 10px;">Login</a>
+            {% endif %}
+        </div>
+        <div class="hero-image"></div>
+    </section>
+
+    <section class="features">
+        <h2>Why Choose NeuroScan AI?</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="feature-icon">⚡</span>
+                <h3>Instant Results</h3>
+                <p>Get analysis results in seconds using our optimized neural networks.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎯</span>
+                <h3>High Accuracy</h3>
+                <p>Trained on thousands of validated MRI scans for maximum precision.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔒</span>
+                <h3>Secure & Private</h3>
+                <p>Your medical data is encrypted and processed with strict privacy standards.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2026 NeuroScan AI. All rights reserved.</p>
+    </footer>
+
+</body>
+
+</html>
