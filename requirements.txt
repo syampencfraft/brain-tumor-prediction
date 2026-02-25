@@ -6,3 +6,5 @@ pillow
 opencv-python
 matplotlib
 scikit-learn
+google-generativeai
+python-dotenv

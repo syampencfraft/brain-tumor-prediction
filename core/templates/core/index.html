@@ -42,16 +42,20 @@
                 </div>
             </form>
 
-            {% if prediction %}
+            {% if prediction_result %}
             <div class="result-section">
                 <div class="result-card">
                     <img src="{{ image_url }}" alt="Uploaded MRI" class="result-image">
                     <div class="result-info">
                         <h2>Result: <span
-                                class="{% if 'Tumor' in prediction %}prediction-positive{% else %}prediction-negative{% endif %}">{{
-                                prediction }}</span></h2>
+                                class="{% if 'Tumor' in prediction_result %}prediction-positive{% else %}prediction-negative{% endif %}">{{
+                                prediction_result }}</span></h2>
                         <p>Confidence: <strong>{{ probability }}</strong></p>
-                        <p style="margin-top: 1rem; color: var(--text-dim); font-size: 0.9rem;">
+                        <div class="details-box"
+                            style="margin-top:1.5rem;padding:1rem;background:rgba(255, 255, 255, 0.05);border-radius:8px;border-left:4px solid var(--primary-color);">
+                            <p style="color:var(--text-main);line-height:1.6;">{{ details }}</p>
+                        </div>
+                        <p style="margin-top:1rem;color:var(--text-dim);font-size:0.9rem;">
                             <i class="fa-solid fa-circle-info"></i> Note: This result is AI-generated and should be
                             verified by a medical professional.
                         </p>
