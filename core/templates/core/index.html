@@ -5,94 +5,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroScan | Brain Tumor Detection</title>
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <title>Dashboard - NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #064E3B;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* Background */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1920&q=80&auto=format&fit=crop') center/cover no-repeat;
+            filter: brightness(0.1) saturate(1.3);
+            animation: bgPulse 16s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            from {
+                transform: scale(1)
+            }
+
+            to {
+                transform: scale(1.06)
+            }
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.93) 0%, rgba(5, 150, 105, 0.45) 50%, rgba(6, 78, 59, 0.97) 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            animation: orbFloat 12s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: rgba(52, 211, 153, 0.1);
+            top: -150px;
+            right: -100px;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(59, 130, 246, 0.08);
+            bottom: -100px;
+            left: 50%;
+            animation-delay: -6s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0)
+            }
+
+            to {
+                transform: translate(35px, 25px)
+            }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .logo span {
+            color: #34D399;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-chip {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            padding: 0 10px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.88rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link-outline {
+            border-color: rgba(52, 211, 153, 0.35);
+            color: #34D399;
+        }
+
+        .nav-link-outline:hover {
+            background: rgba(52, 211, 153, 0.15);
+        }
+
+        .nav-link-accent {
+            border-color: rgba(59, 130, 246, 0.35);
+            color: #93c5fd;
+        }
+
+        .nav-link-accent:hover {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .nav-link-danger {
+            color: #f87171;
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .nav-link-danger:hover {
+            background: rgba(220, 38, 38, 0.15);
+        }
+
+        /* Container */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2.5rem 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.92rem;
+        }
+
+        /* Upload card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 2px solid rgba(52, 211, 153, 0.55);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            margin-bottom: 1.5rem;
+            animation: cardFadeIn 0.7s ease both;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(52, 211, 153, 0.35);
+            border-radius: 18px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(52, 211, 153, 0.03);
+        }
+
+        .upload-area:hover {
+            border-color: rgba(52, 211, 153, 0.6);
+            background: rgba(52, 211, 153, 0.07);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #34D399;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .upload-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .upload-sub {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.85rem;
+        }
+
+        /* Result */
+        .result-card {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            background: rgba(52, 211, 153, 0.05);
+            border-radius: 18px;
+            padding: 1.5rem;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .result-img {
+            max-width: 220px;
+            border-radius: 14px;
+            border: 2px solid rgba(52, 211, 153, 0.35);
+            flex-shrink: 0;
+        }
+
+        .result-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .result-info h2 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pred-positive {
+            color: #f87171;
+            font-weight: 800;
+            font-size: 1.4rem;
+        }
+
+        .pred-negative {
+            color: #34D399;
+            font-weight: 800;
+            font-size: 1.4rem;
+        }
+
+        .confidence-bar {
+            margin: 0.8rem 0;
+        }
+
+        .bar-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .bar-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #34D399, #059669);
+            border-radius: 50px;
+            transition: width 1s ease;
+        }
+
+        .detail-box {
+            margin-top: 1rem;
+            padding: 1rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid #34D399;
+        }
+
+        .detail-box p {
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.65;
+            font-size: 0.88rem;
+        }
+
+        /* Appointments */
+        .appts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .appts-header h2 {
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .appt-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1.1rem 1.4rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.25s;
+        }
+
+        .appt-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(52, 211, 153, 0.2);
+            transform: translateX(3px);
+        }
+
+        .appt-doc {
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.93rem;
+            margin-bottom: 2px;
+        }
+
+        .appt-spec {
+            color: #34D399;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+        }
+
+        .appt-date {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+        }
+
+        .appt-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-confirmed {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 38, 38, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .appt-msg {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.78rem;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="bg-scene">
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
     <nav class="navbar">
-        <div class="logo">NEUROSCAN AI</div>
-        <div class="nav-links">
-            <a href="{% url 'core:index' %}"
-                style="color: var(--text-main); text-decoration: none; font-weight: 500;">Dashboard</a>
-            <span style="color: var(--text-dim); margin: 0 10px;">|</span>
-            <span style="color: var(--text-main);">Welcome, {{ request.user.username }}</span>
-            <a href="{% url 'core:logout' %}"
-                style="color: #ff4d4d; text-decoration: none; font-weight: 500; margin-left: 20px;">Logout</a>
+        <div class="logo">Neuro<span>Scan</span> AI</div>
+        <div class="nav-right">
+            <span class="nav-chip">👤 {{ request.user.username }}</span>
+            <a href="{% url 'core:list_doctors' %}" class="nav-link nav-link-outline">Find Doctors</a>
+            {% if user.is_superuser %}
+            <a href="{% url 'core:admin_dashboard' %}" class="nav-link nav-link-accent">Admin Panel</a>
+            {% endif %}
+            <a href="{% url 'core:logout' %}" class="nav-link nav-link-danger">Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <div class="hero">
-            <h1>Advanced Brain Tumor Detection</h1>
-            <p>Upload an MRI scan to detect potential abnormalities using our proprietary CNN architecture.</p>
+        <div class="page-header">
+            <h1>Brain Tumor Detection</h1>
+            <p>Upload an MRI scan for AI-powered analysis using our proprietary neural network.</p>
         </div>
 
+        <!-- Upload Section -->
         <div class="glass-card">
             <form action="{% url 'core:upload_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
                 {% csrf_token %}
                 <div class="upload-area" onclick="document.getElementById('mri_image').click()">
-                    <div class="upload-icon">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <h3>Drag & Drop or Click to Upload</h3>
-                    <p>Supported formats: JPG, PNG, WEBP (Prefer MRI Scans)</p>
+                    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="upload-title">Drag & Drop or Click to Upload MRI</div>
+                    <div class="upload-sub">Supported formats: JPG, PNG, WEBP</div>
                     <input type="file" name="mri_image" id="mri_image" hidden onchange="this.form.submit()">
                 </div>
             </form>
 
             {% if prediction_result %}
-            <div class="result-section">
-                <div class="result-card">
-                    <img src="{{ image_url }}" alt="Uploaded MRI" class="result-image">
-                    <div class="result-info">
-                        <h2>Result: <span
-                                class="{% if 'Tumor' in prediction_result %}prediction-positive{% else %}prediction-negative{% endif %}">{{
-                                prediction_result }}</span></h2>
-                        <p>Confidence: <strong>{{ probability }}</strong></p>
-                        <div class="details-box"
-                            style="margin-top:1.5rem;padding:1rem;background:rgba(255, 255, 255, 0.05);border-radius:8px;border-left:4px solid var(--primary-color);">
-                            <p style="color:var(--text-main);line-height:1.6;">{{ details }}</p>
-                        </div>
-                        <p style="margin-top:1rem;color:var(--text-dim);font-size:0.9rem;">
-                            <i class="fa-solid fa-circle-info"></i> Note: This result is AI-generated and should be
-                            verified by a medical professional.
-                        </p>
+            <div class="result-card">
+                <img src="{{ image_url }}" alt="MRI Scan" class="result-img">
+                <div class="result-info">
+                    <h2>Detection Result</h2>
+                    <div class="{% if 'Tumor' in prediction_result %}pred-positive{% else %}pred-negative{% endif %}">
+                        {{ prediction_result }}
                     </div>
+
+                    <div class="confidence-bar">
+                        <div class="bar-label">Confidence</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:{{ probability }};"></div>
+                        </div>
+                    </div>
+
+                    <div class="detail-box">
+                        <p>{{ details }}</p>
+                    </div>
+
+                    <p style="color:rgba(255,255,255,0.3);font-size:0.78rem;margin-top:0.8rem;">
+                        <i class="fa-solid fa-circle-info"></i> AI-generated result — please consult a medical
+                        professional for diagnosis.
+                    </p>
                 </div>
             </div>
             {% endif %}
         </div>
+
+        <!-- Appointments -->
+        {% if user_appointments %}
+        <div class="glass-card">
+            <div class="appts-header">
+                <h2>🗓️ My Appointments</h2>
+            </div>
+            {% for appointment in user_appointments %}
+            <div class="appt-item">
+                <div>
+                    <div class="appt-doc">Dr. {{ appointment.doctor.user.first_name }} {{
+                        appointment.doctor.user.last_name }}</div>
+                    <div class="appt-spec">{{ appointment.doctor.specialization }}</div>
+                    <div class="appt-date"><i class="fa-regular fa-calendar"></i> {{
+                        appointment.appointment_date|date:"F d, Y @ H:i" }}</div>
+                </div>
+                <div class="appt-right">
+                    <span
+                        class="status-badge {% if appointment.status == 'Pending' %}status-pending{% elif appointment.status == 'Cancelled' %}status-cancelled{% else %}status-confirmed{% endif %}">
+                        {{ appointment.status }}
+                    </span>
+                    {% if appointment.message %}
+                    <div class="appt-msg">"{{ appointment.message|truncatechars:40 }}"</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 
     <footer>
-        <p>&copy; 2026 NeuroScan AI Project. Built with Django and TensorFlow.</p>
+        <p>&copy; 2026 NeuroScan AI Project. Built with Django &amp; TensorFlow.</p>
     </footer>
 
     <script>
-        // Optional: Add drag and drop visual feedback
         const uploadArea = document.querySelector('.upload-area');
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, e => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+            uploadArea.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); });
         });
-
         uploadArea.addEventListener('dragover', () => {
-            uploadArea.style.borderColor = 'var(--primary-color)';
-            uploadArea.style.background = 'rgba(0, 210, 255, 0.05)';
+            uploadArea.style.borderColor = 'rgba(52,211,153,0.8)';
+            uploadArea.style.background = 'rgba(52,211,153,0.1)';
         });
-
         uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = 'var(--glass-border)';
-            uploadArea.style.background = 'transparent';
+            uploadArea.style.borderColor = 'rgba(52,211,153,0.35)';
+            uploadArea.style.background = 'rgba(52,211,153,0.03)';
         });
-
-        uploadArea.addEventListener('drop', (e) => {
-            const fileInput = document.getElementById('mri_image');
-            fileInput.files = e.dataTransfer.files;
+        uploadArea.addEventListener('drop', e => {
+            document.getElementById('mri_image').files = e.dataTransfer.files;
             document.getElementById('upload-form').submit();
         });
     </script>

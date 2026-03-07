@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile - NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #064E3B;
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+        }
+
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=1920&q=80&auto=format&fit=crop') center/cover no-repeat;
+            filter: brightness(0.1) saturate(1.2);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.92) 0%, rgba(5, 150, 105, 0.5) 60%, rgba(6, 78, 59, 0.95) 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbFloat 10s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(52, 211, 153, 0.12);
+            top: -100px;
+            right: 0;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(59, 130, 246, 0.1);
+            bottom: -100px;
+            left: 200px;
+            animation-delay: -5s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0)
+            }
+
+            to {
+                transform: translate(30px, 25px)
+            }
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 2.5rem;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #34D399;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.22s;
+            margin-bottom: 2px;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            color: #fff;
+            background: rgba(52, 211, 153, 0.2);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2.5rem;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 2px solid rgba(52, 211, 153, 0.55);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 660px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: cardFadeIn 0.6s ease both;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 800;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .profile-avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(52, 211, 153, 0.5);
+            box-shadow: 0 0 30px rgba(52, 211, 153, 0.25);
+            margin-bottom: 1.2rem;
+        }
+
+        .avatar-placeholder {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(52, 211, 153, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 3px solid rgba(52, 211, 153, 0.3);
+            margin: 0 auto 1.2rem;
+        }
+
+        .field-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .field-label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            min-width: 140px;
+        }
+
+        .field-value {
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .prof-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: #34D399;
+            padding: 0.3rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.4rem;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-scene">
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="sidebar">
+        <a href="/" class="logo">Neuro<span>Scan</span></a>
+        <a href="{% url 'core:doctor_dashboard' %}" class="nav-link"><span>🏠</span> Dashboard</a>
+        <a href="{% url 'core:doctor_profile' %}" class="nav-link active"><span>👤</span> Profile</a>
+        <div class="sidebar-footer">
+            <a href="{% url 'core:logout' %}" class="nav-link" style="color:#f87171;"><span>🚪</span> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1>Medical Profile</h1>
+        <div class="glass-card">
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                {% if profile.profile_pic %}
+                <img src="{{ profile.profile_pic.url }}" class="profile-avatar">
+                {% else %}
+                <div class="avatar-placeholder">🩺</div>
+                {% endif %}
+                <h2 style="color:#fff; font-size:1.3rem; font-weight:700; margin-bottom:0.4rem;">Dr. {{ profile.user.first_name }} {{ profile.user.last_name }}</h2>
+                    
+                <span class="prof-badge">✓ Verified Professional</span>
+            </div>
+
+            <hr class="divider">
+
+            <div class="field-row">
+                <span class="field-label">Username</span>
+                <span class="field-value">{{ profile.user.username }}</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Specialization</span>
+                <span class="field-value">{{ profile.specialization }}</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">License Number</span>
+                <span class="field-value">{{ profile.license_number }}</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Hospital / Clinic</span>
+                <span class="field-value">{{ profile.hospital_name }}</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Email</span>
+                <span class="field-value">{{ profile.user.email|default:"Not provided" }}</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

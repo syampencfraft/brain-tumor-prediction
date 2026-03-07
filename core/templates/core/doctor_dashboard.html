@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #064E3B;
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+        }
+
+        /* Background */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=1920&q=80&auto=format&fit=crop') center/cover no-repeat;
+            filter: brightness(0.1) saturate(1.2);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.92) 0%, rgba(5, 150, 105, 0.5) 60%, rgba(6, 78, 59, 0.95) 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbFloat 10s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(52, 211, 153, 0.12);
+            top: -100px;
+            right: 0;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(59, 130, 246, 0.1);
+            bottom: -100px;
+            left: 200px;
+            animation-delay: -5s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0)
+            }
+
+            to {
+                transform: translate(30px, 25px)
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 2.5rem;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #34D399;
+        }
+
+        .sidebar-section-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.22s;
+            margin-bottom: 2px;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            color: #fff;
+            background: rgba(52, 211, 153, 0.2);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .nav-link .icon {
+            font-size: 1.1rem;
+            width: 22px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+        }
+
+        /* Main */
+        .main-content {
+            margin-left: 260px;
+            padding: 2.5rem;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.5s ease;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 2px solid rgba(52, 211, 153, 0.55);
+            border-radius: 20px;
+            padding: 1.8rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, border-color 0.3s;
+            animation: cardFadeIn 0.6s ease both;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Profile section */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .profile-img {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(52, 211, 153, 0.5);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
+        }
+
+        .profile-placeholder {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: rgba(52, 211, 153, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            border: 2px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-spec {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.88rem;
+        }
+
+        .online-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 50px;
+            padding: 0.25rem 0.7rem;
+            font-size: 0.78rem;
+            color: #34D399;
+            font-weight: 600;
+            margin-top: 0.4rem;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #34D399;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.3
+            }
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.4rem 1.2rem;
+            text-align: center;
+            transition: all 0.25s;
+            animation: cardFadeIn 0.7s ease both;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(52, 211, 153, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #34D399;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.82rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Appointments */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .appt-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.25s;
+        }
+
+        .appt-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(52, 211, 153, 0.25);
+            transform: translateX(3px);
+        }
+
+        .appt-name {
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+        }
+
+        .appt-date {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.83rem;
+        }
+
+        .appt-msg {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-confirmed {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .badge-cancelled {
+            background: rgba(220, 38, 38, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .action-btn {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 8px;
+            padding: 5px 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-accept {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .btn-accept:hover {
+            background: rgba(52, 211, 153, 0.25);
+        }
+
+        .btn-cancel {
+            background: rgba(220, 38, 38, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(220, 38, 38, 0.25);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-scene">
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/" class="logo">Neuro<span>Scan</span></a>
+        <div class="sidebar-section-label">Navigation</div>
+        <a href="{% url 'core:doctor_dashboard' %}" class="nav-link active">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="{% url 'core:doctor_profile' %}" class="nav-link">
+            <span class="icon">👤</span> Profile
+        </a>
+        <div class="sidebar-footer">
+            <a href="{% url 'core:logout' %}" class="nav-link" style="color:#f87171;">
+                <span class="icon">🚪</span> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Doctor Dashboard</h1>
+            <p>Manage your appointments and patient sessions</p>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div class="profile-section">
+                {% if user.doctor_profile.profile_pic %}
+                <img src="{{ user.doctor_profile.profile_pic.url }}" class="profile-img">
+                {% else %}
+                <div class="profile-placeholder">🩺</div>
+                {% endif %}
+                <div>
+                    <div class="profile-name">Dr. {{ user.username }}</div>
+                    <div class="profile-spec">{{ user.doctor_profile.specialization }} · {{ user.doctor_profile.hospital_name }}</div>
+                        
+                    <div class="online-badge">
+                        <div class="pulse-dot"></div> Online & Available
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ appointments|length }}</div>
+                <div class="stat-label">Total Appointments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{% for a in appointments %}{% if a.status == 'Pending' %}+{% endif %}{% endfor %}</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">Active</div>
+                <div class="stat-label">Account Status</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">✓</div>
+                <div class="stat-label">Verified Professional</div>
+            </div>
+        </div>
+
+        <!-- Appointments -->
+        <div class="glass-card">
+            <div class="section-header">
+                <div class="section-title">Upcoming Appointments</div>
+            </div>
+
+            {% if appointments %}
+            {% for appointment in appointments %}
+            <div class="appt-item">
+                <div>
+                    <div class="appt-name">{{ appointment.user.first_name }} {{ appointment.user.last_name }}</div>
+                    <div class="appt-date">📅 {{ appointment.appointment_date|date:"F d, Y · H:i" }}</div>
+                    <div class="appt-msg">{{ appointment.message|truncatewords:12 }}</div>
+                    {% if appointment.status == 'Pending' %}
+                    <div class="action-group">
+                        <a href="{% url 'core:update_status' appointment.id 'Confirmed' %}"
+                            class="action-btn btn-accept">✓ Accept</a>
+                        <a href="{% url 'core:update_status' appointment.id 'Cancelled' %}"
+                            class="action-btn btn-cancel">✗ Cancel</a>
+                    </div>
+                    {% endif %}
+                </div>
+                <span
+                    class="badge {% if appointment.status == 'Pending' %}badge-pending{% elif appointment.status == 'Cancelled' %}badge-cancelled{% else %}badge-confirmed{% endif %}">
+                    {{ appointment.status }}
+                </span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>📭 No upcoming appointments.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+
+</html>

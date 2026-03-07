@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from .models import MRIImage
+from .models import MRIImage, DoctorProfile, Appointment
 import os
 import numpy as np
 from PIL import Image
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .forms import DoctorRegistrationForm, AppointmentForm
 from django.contrib.auth.decorators import login_required
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -47,20 +48,117 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'core/signup.html', {'form': form})
 
+def doctor_signup(request):
+    if request.method == 'POST':
+        form = DoctorRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            # login(request, user) # Don't login yet, wait for approval
+            return render(request, 'core/doctor_signup.html', {
+                'form': form, 
+                'success': 'Registration successful! Please wait for admin approval before logging in.'
+            })
+    else:
+        form = DoctorRegistrationForm()
+    return render(request, 'core/doctor_signup.html', {'form': form})
+
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            
+            # Check if doctor and approved
+            if hasattr(user, 'doctor_profile'):
+                if not user.doctor_profile.is_approved:
+                    return render(request, 'core/login.html', {
+                        'form': form, 
+                        'error': 'Your account is awaiting admin approval.'
+                    })
+            
             login(request, user)
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            return redirect('core:index')
+            return redirect('core:dashboard_redirect')
         else:
             return render(request, 'core/login.html', {'form': form, 'error': 'Invalid username or password'})
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
+
+@login_required(login_url='core:login')
+def dashboard_redirect(request):
+    if request.user.is_superuser:
+        return redirect('core:admin_dashboard')
+    if hasattr(request.user, 'doctor_profile'):
+        return redirect('core:doctor_dashboard')
+    return redirect('core:index')
+
+@login_required(login_url='core:login')
+def admin_dashboard(request):
+    if not request.user.is_superuser:
+        return redirect('core:index')
+    
+    pending_doctors = DoctorProfile.objects.filter(is_approved=False).select_related('user').order_by('-user__date_joined')
+    approved_doctors = DoctorProfile.objects.filter(is_approved=True).select_related('user').order_by('-user__date_joined')
+    
+    return render(request, 'core/admin_dashboard.html', {
+        'pending_doctors': pending_doctors,
+        'approved_doctors': approved_doctors
+    })
+
+@login_required(login_url='core:login')
+def approve_doctor(request, doctor_id):
+    if not request.user.is_superuser:
+        return redirect('core:index')
+    
+    doctor = DoctorProfile.objects.get(id=doctor_id)
+    doctor.is_approved = True
+    doctor.save()
+    return redirect('core:admin_dashboard')
+
+@login_required(login_url='core:login')
+def reject_doctor(request, doctor_id):
+    if not request.user.is_superuser:
+        return redirect('core:index')
+    
+    doctor = DoctorProfile.objects.get(id=doctor_id)
+    user = doctor.user
+    doctor.delete()
+    user.delete()
+    return redirect('core:admin_dashboard')
+
+@login_required(login_url='core:login')
+def doctor_dashboard(request):
+    if not hasattr(request.user, 'doctor_profile'):
+        return redirect('core:index')
+    appointments = Appointment.objects.filter(doctor=request.user.doctor_profile).order_by('appointment_date')
+    return render(request, 'core/doctor_dashboard.html', {'appointments': appointments})
+
+@login_required(login_url='core:login')
+def doctor_profile(request):
+    profile = request.user.doctor_profile
+    return render(request, 'core/doctor_profile.html', {'profile': profile})
+
+@login_required(login_url='core:login')
+def list_doctors(request):
+    doctors = DoctorProfile.objects.filter(is_approved=True)
+    return render(request, 'core/doctor_list.html', {'doctors': doctors})
+
+@login_required(login_url='core:login')
+def book_appointment(request, doctor_id):
+    doctor = DoctorProfile.objects.get(id=doctor_id)
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.user = request.user
+            appointment.doctor = doctor
+            appointment.save()
+            return redirect('core:index')
+    else:
+        form = AppointmentForm()
+    return render(request, 'core/book_appointment.html', {'form': form, 'doctor': doctor})
 
 def logout_view(request):
     logout(request)
@@ -69,7 +167,25 @@ def logout_view(request):
 @login_required(login_url='core:login')
 def index(request):
     images = MRIImage.objects.all().order_by('-uploaded_at')[:5]
-    return render(request, 'core/index.html', {'images': images})
+    user_appointments = Appointment.objects.filter(user=request.user).order_by('-appointment_date')
+    return render(request, 'core/index.html', {
+        'images': images,
+        'user_appointments': user_appointments
+    })
+
+@login_required(login_url='core:login')
+def update_appointment_status(request, appointment_id, new_status):
+    appointment = Appointment.objects.get(id=appointment_id)
+    
+    # Security: Only the assigned doctor can update the status
+    if not hasattr(request.user, 'doctor_profile') or appointment.doctor != request.user.doctor_profile:
+        return redirect('core:index')
+    
+    if new_status in ['Confirmed', 'Cancelled']:
+        appointment.status = new_status
+        appointment.save()
+        
+    return redirect('core:doctor_dashboard')
 
 @login_required(login_url='core:login')
 def upload_image(request):

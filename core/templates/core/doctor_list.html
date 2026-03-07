@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors - NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #064E3B;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1504813184591-01572f98c85f?w=1920&q=80&auto=format&fit=crop') center/cover no-repeat;
+            filter: brightness(0.1) saturate(1.2);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.92) 0%, rgba(5, 150, 105, 0.5) 60%, rgba(6, 78, 59, 0.95) 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbFloat 10s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(52, 211, 153, 0.12);
+            top: -100px;
+            right: 0;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(59, 130, 246, 0.1);
+            bottom: -100px;
+            left: 0;
+            animation-delay: -5s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0)
+            }
+
+            to {
+                transform: translate(40px, 25px)
+            }
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #34D399;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-logout {
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-hero {
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .page-hero h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-hero p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+        }
+
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .doctor-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid rgba(52, 211, 153, 0.55);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s;
+            animation: cardIn 0.6s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doctor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.6), transparent);
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+
+        .doctor-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .doctor-card:hover {
+            border-color: rgba(52, 211, 153, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .doctor-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(52, 211, 153, 0.4);
+            margin-bottom: 1rem;
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+        }
+
+        .doctor-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(52, 211, 153, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            border: 2px solid rgba(52, 211, 153, 0.25);
+            margin-bottom: 1rem;
+        }
+
+        .doctor-name {
+            font-weight: 700;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .doctor-spec {
+            color: #34D399;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .doctor-hospital {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.82rem;
+            margin-bottom: 1.3rem;
+        }
+
+        .btn-book {
+            display: inline-block;
+            background: linear-gradient(135deg, #34D399, #059669);
+            color: #fff;
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-decoration: none;
+            transition: all 0.25s;
+            box-shadow: 0 3px 15px rgba(52, 211, 153, 0.25);
+        }
+
+        .btn-book:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(52, 211, 153, 0.4);
+        }
+
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 4rem;
+            color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-scene">
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="/" class="logo">Neuro<span>Scan</span> AI</a>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <a href="{% url 'core:index' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'core:logout' %}" class="nav-link btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-hero">
+            <h1>Find Medical Professionals</h1>
+            <p>Browse verified doctors and book a consultation session.</p>
+        </div>
+
+        <div class="doctors-grid">
+            {% for doctor in doctors %}
+            <div class="doctor-card">
+                {% if doctor.profile_pic %}
+                <img src="{{ doctor.profile_pic.url }}" class="doctor-img">
+                {% else %}
+                <div class="doctor-placeholder">👨‍⚕️</div>
+                {% endif %}
+                <div class="doctor-name">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</div>
+                <div class="doctor-spec">{{ doctor.specialization }}</div>
+                <div class="doctor-hospital">🏥 {{ doctor.hospital_name }}</div>
+                <a href="{% url 'core:book_appointment' doctor.id %}" class="btn-book">Book Session</a>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <p>No doctors available at the moment. Check back soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+
+</html>

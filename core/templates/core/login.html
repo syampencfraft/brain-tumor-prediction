@@ -5,33 +5,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
-        :root {
-            --primary: #00f2ea;
-            --bg-dark: #0a0a12;
-            --text-light: #e0e0e0;
-            --card-bg: #161625;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            justify-content: center;
+            padding: 1rem;
+            background: #064E3B;
+            overflow: hidden;
+        }
+
+        /* Background */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1920&q=80&auto=format&fit=crop') center/cover no-repeat;
+            filter: brightness(0.12) saturate(1.5);
+            animation: bgPulse 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.08);
+            }
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.7) 0%, rgba(6, 78, 59, 0.85) 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            animation: orbFloat 8s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(52, 211, 153, 0.2);
+            top: -100px;
+            right: -80px;
+        }
+
+        .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: rgba(59, 130, 246, 0.15);
+            bottom: -80px;
+            left: -80px;
+            animation-delay: -4s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(30px, 30px);
+            }
+        }
+
+        /* Card */
+        .auth-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
         }
 
         .auth-card {
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid rgba(52, 211, 153, 0.7);
+            border-radius: 24px;
             padding: 3rem;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .auth-header {
@@ -39,101 +130,170 @@
             margin-bottom: 2rem;
         }
 
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .logo span {
+            color: #34D399;
+        }
+
         .auth-header h2 {
             color: #fff;
-            margin: 0;
-            font-size: 2rem;
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.3rem;
         }
 
         .form-group label {
             display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #aaa;
+            letter-spacing: 0.3px;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.35);
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: #34D399;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
         }
 
         .btn {
             width: 100%;
-            background: linear-gradient(45deg, var(--primary), #00c2ba);
-            color: #000;
-            padding: 0.8rem;
+            background: linear-gradient(135deg, #34D399, #059669);
+            color: #fff;
+            padding: 0.9rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1rem;
-            font-weight: bold;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: opacity 0.3s;
+            transition: all 0.25s;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 20px rgba(52, 211, 153, 0.3);
         }
 
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(52, 211, 153, 0.5);
         }
 
         .auth-footer {
             text-align: center;
-            margin-top: 1.5rem;
-            color: #aaa;
+            margin-top: 1.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.88rem;
         }
 
         .auth-footer a {
-            color: var(--primary);
+            color: #34D399;
             text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-footer p {
+            margin-bottom: 0.4rem;
+        }
+
+        .error-msg {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            color: #fca5a5;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.88rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            margin: 1.5rem 0;
         }
     </style>
 </head>
 
 <body>
-
-    <div class="auth-card">
-        <div class="auth-header">
-            <h2>Welcome Back</h2>
-            <p>Login to confirm your identity</p>
-        </div>
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" required>
-            </div>
-
-            {% if error %}
-            <div style="color: #ff4d4d; margin-bottom: 1rem; text-align: center;">
-                {{ error }}
-            </div>
-            {% endif %}
-
-            <button type="submit" class="btn">Login</button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Don't have an account? <a href="{% url 'core:signup' %}">Sign up</a></p>
-            <p><a href="{% url 'core:home' %}">Back to Home</a></p>
-        </div>
+    <div class="bg-scene">
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
     </div>
 
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">Neuro<span>Scan</span> AI</div>
+                <h2>Welcome Back</h2>
+                <p>Login to access your dashboard</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control"
+                        placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                        placeholder="Enter your password" required>
+                </div>
+
+                {% if error %}
+                <div class="error-msg">{{ error }}</div>
+                {% endif %}
+
+                <button type="submit" class="btn">Login</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'core:signup' %}">Sign up</a></p>
+                <p><a href="{% url 'core:home' %}">← Back to Home</a></p>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #064E3B;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1504813184591-01572f98c85f?w=1920&q=80&auto=format&fit=crop') center/cover no-repeat;
+            filter: brightness(0.08) saturate(1.2);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.92) 0%, rgba(5, 150, 105, 0.5) 60%, rgba(6, 78, 59, 0.95) 100%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbFloat 10s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 450px;
+            height: 450px;
+            background: rgba(52, 211, 153, 0.15);
+            top: -100px;
+            right: -100px;
+        }
+
+        .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: rgba(59, 130, 246, 0.12);
+            bottom: -80px;
+            left: -80px;
+            animation-delay: -5s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0)
+            }
+
+            to {
+                transform: translate(40px, 30px)
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 540px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #34D399;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-top: 3px solid rgba(52, 211, 153, 0.7);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        .doctor-header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(52, 211, 153, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .doctor-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(52, 211, 153, 0.5);
+            margin-bottom: 1rem;
+            box-shadow: 0 0 25px rgba(52, 211, 153, 0.3);
+        }
+
+        .doctor-placeholder {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(52, 211, 153, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin: 0 auto 1rem;
+            border: 3px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .doctor-header h3 {
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .doctor-header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.88rem;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-body h2 {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.3rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.83rem;
+            font-weight: 600;
+            margin-bottom: 0.45rem;
+            letter-spacing: 0.3px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.93rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #34D399;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+        }
+
+        select option {
+            background: #065f46;
+            color: #fff;
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #34D399, #059669);
+            color: #fff;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 20px rgba(52, 211, 153, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(52, 211, 153, 0.5);
+        }
+
+        ul.errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 0;
+            color: #fca5a5;
+            font-size: 0.82rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-scene">
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'core:list_doctors' %}" class="back-link">← Back to Doctors</a>
+
+        <div class="card">
+            <div class="doctor-header">
+                {% if doctor.profile_pic %}
+                <img src="{{ doctor.profile_pic.url }}" class="doctor-img">
+                {% else %}
+                <div class="doctor-placeholder">👨‍⚕️</div>
+                {% endif %}
+                <h3>Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h3>
+                <p>{{ doctor.specialization }} · {{ doctor.hospital_name }}</p>
+            </div>
+
+            <div class="form-body">
+                <h2>Book a Consultation</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn">✓ Confirm Booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
