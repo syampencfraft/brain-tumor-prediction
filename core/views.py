@@ -210,70 +210,90 @@ def upload_image(request):
     
     return redirect('core:index')
 
+import time
+
 def predict_tumor(image_path):
     if not API_KEY:
         return "Config Error", 0.0, "Gemini API key not found. Please check your .env file."
     
-    try:
-        # Dynamic model selection to avoid 404 errors
-        available_models = [m.name for m in genai.list_models() 
-                            if 'generateContent' in m.supported_generation_methods]
-        
-        # Prefer flash models
-        model_name = 'models/gemini-1.5-flash' # Default attempt
-        flash_models = [m for m in available_models if 'flash' in m]
-        if flash_models:
-            model_name = flash_models[0]
-        elif available_models:
-            model_name = available_models[0]
-
-        model = genai.GenerativeModel(model_name)
-        img = Image.open(image_path)
-        
-        prompt = """
-        Analyze this image for a brain tumor detection system.
-        
-        Step 1: Is this a Brain MRI Scan? 
-        Answer "YES" or "NO".
-        
-        Step 2: If YES, is there a brain tumor detected? 
-        Answer "Tumor Detected" or "No Tumor".
-        Provide a confidence score between 0 and 100.
-        
-        Format the response strictly as JSON:
-        {"is_mri": "YES", "prediction": "Tumor Detected", "confidence": 95.5, "details": "A detailed description of the AI analysis."}
-        
-        If Step 1 is NO, format as:
-        {"is_mri": "NO", "prediction": "Not an MRI", "confidence": 0, "details": "This image does not appear to be a Brain MRI scan. Please upload a valid Brain MRI for analysis."}
-        """
-        
-        response = model.generate_content([prompt, img])
-        text = response.text
-        
-        # Extract JSON from response more robustly
+    max_retries = 2
+    retry_delay = 2  # seconds
+    
+    for attempt in range(max_retries + 1):
         try:
-            start = text.find('{')
-            end = text.rfind('}') + 1
-            if start != -1 and end != -1:
-                data = json.loads(text[start:end])
-                is_mri = data.get('is_mri', 'NO')
-                
-                if is_mri == 'NO':
-                    return "Not an MRI Scan", 0.0, data.get('details', "This image is not a valid brain MRI scan.")
-                
-                prediction = data.get('prediction', 'Analysis Completed')
-                confidence = float(data.get('confidence', 0.0)) / 100.0
-                details = data.get('details', "Analysis completed successfully.")
-                
-                return prediction, confidence, details
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"JSON Parsing Error: {e}")
-            # Fallback if JSON fails but text exists
-            if "YES" in text.upper():
-                return "Analysis Completed", 0.85, text.strip()[:200]
-        
-        return "Processing Error", 0.0, "Could not parse analysis results. Please ensure the image is a clear Brain MRI."
-        
-    except Exception as e:
-        print(f"Gemini Error: {e}")
-        return "AI Error", 0.0, f"Error communicating with AI: {str(e)}"
+            # Dynamic model selection to avoid 404 errors
+            available_models = [m.name for m in genai.list_models() 
+                                if 'generateContent' in m.supported_generation_methods]
+            
+            # Prefer flash models
+            model_name = 'models/gemini-1.5-flash' # Default attempt
+            flash_models = [m for m in available_models if 'flash' in m]
+            if flash_models:
+                model_name = flash_models[0]
+            model = genai.GenerativeModel(model_name)
+            
+            prompt = """
+            Analyze this image for a brain tumor detection system.
+            
+            Step 1: Is this a Brain MRI Scan? 
+            Answer "YES" or "NO".
+            
+            Step 2: If YES, is there a brain tumor detected? 
+            Answer "Tumor Detected" or "No Tumor".
+            Provide a confidence score between 0 and 100.
+            
+            Format the response strictly as JSON:
+            {"is_mri": "YES", "prediction": "Tumor Detected", "confidence": 95.5, "details": "A detailed description of the AI analysis."}
+            
+            If Step 1 is NO, format as:
+            {"is_mri": "NO", "prediction": "Not an MRI", "confidence": 0, "details": "This image does not appear to be a Brain MRI scan. Please upload a valid Brain MRI for analysis."}
+            """
+
+            with Image.open(image_path) as img:
+                response = model.generate_content([prompt, img])
+                text = response.text
+            
+            # Extract JSON from response more robustly
+            try:
+                start = text.find('{')
+                end = text.rfind('}') + 1
+                if start != -1 and end != -1:
+                    data = json.loads(text[start:end])
+                    is_mri = data.get('is_mri', 'NO')
+                    
+                    if is_mri == 'NO':
+                        return "Not an MRI Scan", 0.0, data.get('details', "This image is not a valid brain MRI scan.")
+                    
+                    prediction = data.get('prediction', 'Analysis Completed')
+                    confidence = float(data.get('confidence', 0.0)) / 100.0
+                    details = data.get('details', "Analysis completed successfully.")
+                    
+                    return prediction, confidence, details
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"JSON Parsing Error: {e}")
+                # Fallback if JSON fails but text exists
+                if "YES" in text.upper():
+                    return "Analysis Completed", 0.85, text.strip()[:200]
+            
+            return "Processing Error", 0.0, "Could not parse analysis results. Please ensure the image is a clear Brain MRI."
+            
+        except Exception as e:
+            error_msg = str(e)
+            print(f"Gemini Error (Attempt {attempt+1}/{max_retries+1}): {error_msg}")
+            
+            # Check for DNS/Connection errors
+            if "DNS resolution failed" in error_msg or "getaddrinfo" in error_msg or "deadline exceeded" in error_msg:
+                if attempt < max_retries:
+                    print(f"Connection issue detected. Retrying in {retry_delay}s...")
+                    time.sleep(retry_delay)
+                    continue
+                return "Network Error", 0.0, "The AI service is unreachable. Please check your internet connection or DNS settings. If you use a VPN or custom DNS, try disabling them temporarily."
+            
+            # Other errors
+            if attempt < max_retries:
+                time.sleep(retry_delay)
+                continue
+            return "AI Error", 0.0, f"Error communicating with AI: {error_msg}. Please try again later."
+    
+    return "AI Error", 0.0, "Exceeded maximum retries for AI communication."
+

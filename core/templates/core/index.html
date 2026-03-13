@@ -494,20 +494,35 @@
                 <img src="{{ image_url }}" alt="MRI Scan" class="result-img">
                 <div class="result-info">
                     <h2>Detection Result</h2>
-                    <div class="{% if 'Tumor' in prediction_result %}pred-positive{% else %}pred-negative{% endif %}">
+                    <div class="{% if 'Tumor' in prediction_result %}pred-positive{% elif 'Error' in prediction_result %}pred-positive{% else %}pred-negative{% endif %}" 
+                         style="{% if 'Error' in prediction_result %}color: #fbbf24;{% endif %}">
                         {{ prediction_result }}
                     </div>
 
+                    {% if probability > 0 %}
                     <div class="confidence-bar">
                         <div class="bar-label">Confidence</div>
                         <div class="bar-track">
                             <div class="bar-fill" style="width:{{ probability }};"></div>
                         </div>
                     </div>
+                    {% endif %}
 
-                    <div class="detail-box">
+                    <div class="detail-box" style="{% if 'Error' in prediction_result %}border-left-color: #fbbf24; background: rgba(245, 158, 11, 0.05);{% endif %}">
                         <p>{{ details }}</p>
                     </div>
+
+                    {% if 'Error' in prediction_result %}
+                    <div class="detail-box" style="margin-top: 0.8rem; border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.05);">
+                        <p style="color: #93c5fd; font-weight: 600; margin-bottom: 5px;"><i class="fa-solid fa-wrench"></i> Troubleshooting Tips:</p>
+                        <ul style="color: rgba(255,255,255,0.6); font-size: 0.82rem; padding-left: 20px;">
+                            <li>Check your internet connection stability.</li>
+                            <li>If using a VPN or Proxy, try disabling it temporarily.</li>
+                            <li>Ensure your DNS settings are default (e.g., Use Google DNS 8.8.8.8 if issues persist).</li>
+                            <li>Wait a few moments and try re-uploading the image.</li>
+                        </ul>
+                    </div>
+                    {% endif %}
 
                     <p style="color:rgba(255,255,255,0.3);font-size:0.78rem;margin-top:0.8rem;">
                         <i class="fa-solid fa-circle-info"></i> AI-generated result — please consult a medical
@@ -516,6 +531,7 @@
                 </div>
             </div>
             {% endif %}
+
         </div>
 
         <!-- Appointments -->
